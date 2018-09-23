@@ -32,12 +32,23 @@ module Airrecord
         @api_key || Airrecord.api_key
       end
 
+      def find_from_cache(id)
+        @@full_records ||= {}
+        @@full_records[id]
+      end
+
+      def update_cache(full_record)
+        @@full_records ||= {}
+        @@full_records[full_record.id] = full_record
+      end
+
       def find(id)
-        response = client.connection_get_cache("/v0/#{base_key}/#{client.escape(table_name)}/#{id}")
+        response = client.connection.get("/v0/#{base_key}/#{client.escape(table_name)}/#{id}")
         parsed_response = client.parse(response.body)
 
         if response.success?
-          self.new(parsed_response["fields"], id: id)
+          record = self.new(parsed_response["fields"], id: id)
+          update_cache(record)
         else
           client.handle_error(response.status, parsed_response)
         end
@@ -60,13 +71,14 @@ module Airrecord
         options[:pageSize] = page_size if page_size
 
         path = "/v0/#{base_key}/#{client.escape(table_name)}"
-        response = client.connection_get_cache(path, options)
+        response = client.connection.get(path, options)
         parsed_response = client.parse(response.body)
 
         if response.success?
           records = parsed_response["records"]
           records = records.map { |record|
-            self.new(record["fields"], id: record["id"], created_at: record["createdTime"])
+            record_obj = self.new(record["fields"], id: record["id"], created_at: record["createdTime"])
+            fields.nil? ? update_cache(record_obj) : record_obj
           }
 
           if paginate && parsed_response["offset"]
