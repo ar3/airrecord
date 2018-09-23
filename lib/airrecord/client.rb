@@ -7,6 +7,14 @@ module Airrecord
 
     def initialize(api_key)
       @api_key = api_key
+      @cache = {}
+    end
+
+    def connection_get_cache(get_url, options={})
+      cache_key = "#{get_url}____#{options.to_s}"
+      return @cache[cache_key] if !@cache[cache_key].nil?
+
+      @cache[cache_key] = connection.get(get_url, options)
     end
 
     def connection

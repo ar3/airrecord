@@ -33,7 +33,7 @@ module Airrecord
       end
 
       def find(id)
-        response = client.connection.get("/v0/#{base_key}/#{client.escape(table_name)}/#{id}")
+        response = client.connection_get_cache("/v0/#{base_key}/#{client.escape(table_name)}/#{id}")
         parsed_response = client.parse(response.body)
 
         if response.success?
@@ -60,7 +60,7 @@ module Airrecord
         options[:pageSize] = page_size if page_size
 
         path = "/v0/#{base_key}/#{client.escape(table_name)}"
-        response = client.connection.get(path, options)
+        response = client.connection_get_cache(path, options)
         parsed_response = client.parse(response.body)
 
         if response.success?
