@@ -43,6 +43,9 @@ module Airrecord
       end
 
       def find(id)
+        response = find_from_cache(id)
+        return response if !response.nil?
+
         response = client.connection.get("/v0/#{base_key}/#{client.escape(table_name)}/#{id}")
         parsed_response = client.parse(response.body)
 
