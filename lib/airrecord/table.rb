@@ -113,7 +113,7 @@ module Airrecord
 
       if association = self.association(key)
         klass = Kernel.const_get(association[:class])
-        associations = value.map { |id_or_obj|
+        associations = (value || []).map { |id_or_obj|
           id_or_obj = id_or_obj.respond_to?(:id) ? id_or_obj.id : id_or_obj
           klass.find(id_or_obj)
         }
@@ -196,14 +196,14 @@ module Airrecord
           value = [ value ] unless value.is_a?(Enumerable)
           assocs = value.map { |assoc|
             assoc.respond_to?(:id) ? assoc.id : assoc
-          }               
+          }
           [key, assocs]
         else
           [key, value]
         end
         }]
     end
-    
+
     def ==(other)
       self.class == other.class &&
         serializable_fields == other.serializable_fields
